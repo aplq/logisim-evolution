@@ -30,6 +30,8 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
@@ -586,11 +588,17 @@ public class FpgaIoInformationSettingsDialog {
     CancelButton.addActionListener(actionListener);
     c.gridx = 0;
     contents.add(CancelButton, c);
+    // FIXME: Find better solution to handle window close button
+    selWindow.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        CancelButton.doClick();
+      }
+    });
     selWindow.add(new JScrollPane(contents));
     selWindow.pack();
     selWindow.setLocationRelativeTo(IOcomps.getParentFrame());
     selWindow.setModal(true);
-    selWindow.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
     selWindow.setAlwaysOnTop(true);
     abort = false;
     while (!abort) {
@@ -961,6 +969,13 @@ public class FpgaIoInformationSettingsDialog {
     c.gridy = 2;
     c.fill = GridBagConstraints.HORIZONTAL;
     selWindow.add(cancelButton, c);
+    // FIXME: Find better solution to handle window close button
+    selWindow.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        cancelButton.doClick();
+      }
+    });
 
     final var saveButton = new JButton(S.get("FpgaBoardDone"));
     saveButton.addActionListener(actionListener);
