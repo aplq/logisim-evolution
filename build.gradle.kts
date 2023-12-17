@@ -13,11 +13,11 @@ import java.util.Date
 
 plugins {
   checkstyle
-  id("com.github.ben-manes.versions") version "0.48.0"
+  id("com.github.ben-manes.versions") version "0.50.0"
   java
   application
   id("com.github.johnrengelman.shadow") version "8.1.1"
-  id("org.sonarqube") version "4.3.1.3277"
+  id("org.sonarqube") version "4.4.1.3373"
 }
 
 repositories {
@@ -38,9 +38,9 @@ dependencies {
   implementation("org.scijava:swing-checkbox-tree:1.0.2")
   implementation("org.slf4j:slf4j-api:2.0.9")
   implementation("org.slf4j:slf4j-simple:2.0.9")
-  implementation("com.formdev:flatlaf:3.2.1")
-  implementation("commons-cli:commons-cli:1.5.0")
-  implementation("org.apache.commons:commons-text:1.10.0")
+  implementation("com.formdev:flatlaf:3.2.5")
+  implementation("commons-cli:commons-cli:1.6.0")
+  implementation("org.apache.commons:commons-text:1.11.0")
 
   // NOTE: Do not upgrade the jflex version. Later versions do not work.
   compileOnly("de.jflex:jflex:1.4.1")
@@ -49,9 +49,9 @@ dependencies {
   // See: https://github.com/logisim-evolution/logisim-evolution/issues/709
   // implementation("org.apache.xmlgraphics:batik-swing:1.14")
 
-  testImplementation(platform("org.junit:junit-bom:5.10.0"))
-  testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-  testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+  testImplementation(platform("org.junit:junit-bom:5.10.1"))
+  testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+  testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -62,6 +62,7 @@ val APP_DIR_NAME = "appDirName"
 val APP_VERSION = "appVersion"
 val APP_VERSION_SHORT = "appVersionShort"
 val APP_URL = "appUrl"
+val BUILD_DIR = "buildDir"
 val JPACKAGE = "jpackage"
 val LIBS_DIR = "libsDir"
 val LINUX_PARAMS = "linuxParameters"
@@ -105,6 +106,10 @@ extra.apply {
   // Architecture used for build
   val osArch = System.getProperty("os.arch") ?: throw GradleException("os.arch is not set")
   set(OS_ARCH, osArch)
+
+  // Build Directory
+  val buildDir = getLayout().getBuildDirectory().get().asFile.toString()
+  set(BUILD_DIR, buildDir)
 
   // Destination folder where packages are stored.
   val targetDir="${buildDir}/dist"
@@ -182,6 +187,7 @@ extra.apply {
 
 java {
   sourceSets["main"].java {
+    val buildDir = getLayout().getBuildDirectory().get().asFile
     srcDir("${buildDir}/generated/logisim/java")
     srcDir("${buildDir}/generated/sources/srcgen")
   }
@@ -395,6 +401,7 @@ tasks.register("createMsi") {
  */
 tasks.register("createApp") {
   val supportDir = ext.get(SUPPORT_DIR) as String
+  val buildDir = ext.get(BUILD_DIR) as String
   val dest = "${buildDir}/macOS-${ext.get(OS_ARCH) as String}"
 
   group = "build"
@@ -564,6 +571,7 @@ fun genBuildInfo(buildInfoFilePath: String) {
  */
 tasks.register("genBuildInfo") {
   // Target location for generated files.
+  val buildDir = ext.get(BUILD_DIR) as String
   val buildInfoDir = "${buildDir}/generated/logisim/java/com/cburch/logisim/generated"
 
   group = "build"
@@ -589,6 +597,7 @@ tasks.register("genBuildInfo") {
 tasks.register("genVhdlSyntax") {
   val sourceFile = "${projectDir}/src/main/jflex/com/cburch/logisim/vhdl/syntax/VhdlSyntax.jflex"
   val skeletonFile = "${projectDir}/support/jflex/skeleton.default"
+  val buildDir = ext.get(BUILD_DIR) as String
   val targetDir = "${buildDir}/generated/logisim/java/com/cburch/logisim/vhdl/syntax/"
 
   group = "build"
